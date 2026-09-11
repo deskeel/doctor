@@ -109,11 +109,12 @@ async function detectBuilder(cwd: string, packageJson: PackageJson | null): Prom
   return null;
 }
 
-export async function loadProjectContext(cwd: string): Promise<ProjectContext> {
+export async function loadProjectContext(cwd: string, now: Date = new Date()): Promise<ProjectContext> {
   const { packageJson, error } = await readPackageJson(cwd);
   const [lockfiles, builder] = await Promise.all([findLockfiles(cwd), detectBuilder(cwd, packageJson)]);
   return {
     cwd,
+    now,
     packageJson,
     ...(error ? { packageJsonError: error } : {}),
     lockfiles,

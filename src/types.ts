@@ -15,6 +15,8 @@ export interface Finding {
   detail?: string;
   /** 怎么改。 */
   fix?: string;
+  /** 结论依据的具体证据：文件路径、二进制里读到的值、内置数据的截止日期等。 */
+  evidence?: string[];
 }
 
 export interface Rule {
@@ -63,6 +65,8 @@ export interface BuilderConfig {
 
 export interface ProjectContext {
   cwd: string;
+  /** 运行时刻。规则用它判断日期类结论，测试可以固定它。 */
+  now: Date;
   packageJson: PackageJson | null;
   packageJsonError?: string;
   lockfiles: LockfileInfo[];

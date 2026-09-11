@@ -1,6 +1,7 @@
 import type { Rule } from '../types.ts';
 import { debMetadata } from './deb-metadata.ts';
 import { electronDependency } from './electron-dependency.ts';
+import { electronLifecycle } from './electron-lifecycle.ts';
 import { linuxDebTarget } from './linux-deb-target.ts';
 import { lockfile } from './lockfile.ts';
 import { packageJson } from './package-json.ts';
@@ -13,6 +14,7 @@ import { productNameAscii } from './product-name-ascii.ts';
 export const builtinRules: readonly Rule[] = [
   packageJson,
   electronDependency,
+  electronLifecycle,
   lockfile,
   linuxDebTarget,
   debMetadata,

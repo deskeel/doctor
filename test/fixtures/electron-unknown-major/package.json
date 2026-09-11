@@ -1,0 +1,7 @@
+{
+  "name": "future-app",
+  "version": "1.0.0",
+  "devDependencies": {
+    "electron": "^99.0.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "installed-app",
+  "version": "1.0.0",
+  "devDependencies": {
+    "electron": "^44.0.0"
+  }
+}

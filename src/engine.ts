@@ -16,6 +16,8 @@ export interface RunOptions {
   cwd?: string;
   /** 自定义规则集，默认内置规则。 */
   rules?: readonly Rule[];
+  /** 运行时刻，默认当前时间。用于固定日期类结论以便测试和复现。 */
+  now?: Date;
 }
 
 function summarizeProject(context: ProjectContext): ProjectSummary {
@@ -41,7 +43,7 @@ function summarizeFindings(findings: Finding[]): DoctorReport['summary'] {
 export async function runDoctor(options: RunOptions = {}): Promise<DoctorReport> {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const rules = options.rules ?? builtinRules;
-  const context = await loadProjectContext(cwd);
+  const context = await loadProjectContext(cwd, options.now ?? new Date());
 
   const findings: Finding[] = [];
   for (const rule of rules) {

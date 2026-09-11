@@ -47,5 +47,6 @@ function formatFinding(
   const body: string[] = [];
   if (finding.detail) body.push(`    原因：${finding.detail}`);
   if (finding.fix) body.push(`    建议：${finding.fix}`);
+  for (const item of finding.evidence ?? []) body.push(dim(`    依据：${item}`));
   return [head, ...body].join('\n');
 }

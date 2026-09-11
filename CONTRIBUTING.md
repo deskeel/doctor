@@ -31,7 +31,8 @@ doctor 是离线的只读工具。以下内容不会被接受：
 - 任何遥测、上报、网络请求。
 - 读取工程之外的任何配置文件或账号信息。
 - 修改用户工程文件的“自动修复”。
-- 执行 electron-builder、Forge 或用户工程中的任何脚本。
+- 执行 electron-builder、Forge、node-gyp 或用户工程中的任何脚本；对 `node_modules` 只读取已经存在的产物。
+- Windows / macOS 相关检查；ARM64 的阈值判定（只识别，不判定）。
 
 ## 规则编写
 
@@ -56,6 +57,8 @@ doctor 是离线的只读工具。以下内容不会被接受：
 - `severity`：`error` 表示按当前配置无法产出可交付的 DEB 或无法在目标系统运行；`warning` 表示很可能出问题或结论不可复现；`info` 表示 doctor 无法判断、需要用户自行确认。
 - `verification`：`local` 表示用户可以在本地修复；`device` 表示必须在统信 UOS / 银河麒麟真机上验证。
 - `title` 一句话结论，`detail` 说明为什么在目标系统上会出问题，`fix` 说明怎么改。三者都用中文，避免只给出抽象描述。
+- `evidence`（可选）列出结论依据的具体事实：文件路径、从二进制读到的值、内置数据的截止日期。涉及目标系统的 `device` 结论必须附 evidence。
+- 日期类判断用 `context.now`，不要直接 `new Date()`，否则测试会随时间漂移。
 - 不要为了制造紧迫感把结论写得比证据更确定。
 
 ### 测试与文档
@@ -68,4 +71,5 @@ doctor 是离线的只读工具。以下内容不会被接受：
 
 - 提交标题使用 `type: summary`：`feat`、`fix`、`docs`、`chore`、`refactor`、`test`。
 - `main` 上的提交会由 release-please 汇总成发布 PR，合并后自动打 tag、生成 CHANGELOG 并发布到 npm。`feat` 提升次版本号，`fix` 提升修订号，标题带 `!` 或正文含 `BREAKING CHANGE` 提升主版本号。
-- JSON 报告的字段属于公开接口。删除或改名字段需要递增 `REPORT_SCHEMA_VERSION` 并标记为破坏性变更。
+- JSON 报告的字段属于公开接口。新增可选字段作为 `feat` 发布；删除或改名字段需要递增 `REPORT_SCHEMA_VERSION` 并标记为破坏性变更。
+- 内置数据（`src/data/`）更新时在提交信息里写明核对日期与来源，并同步 `dataAsOf`。

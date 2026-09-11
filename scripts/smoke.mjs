@@ -10,7 +10,12 @@ const fixture = (name) => path.join(root, 'test', 'fixtures', name);
 const cases = [
   { args: [fixture('electron-builder-deb')], exitCode: 0 },
   { args: [fixture('misconfigured')], exitCode: 1 },
+  { args: [fixture('deb-missing-metadata')], exitCode: 1 },
+  { args: [fixture('non-ascii-name')], exitCode: 1 },
+  { args: [fixture('arch-targets')], exitCode: 1 },
+  { args: [fixture('native-modules')], exitCode: 0, device: true },
   { args: ['--json', fixture('empty')], exitCode: 1, json: true },
+  { args: ['--json', fixture('native-modules')], exitCode: 0, json: true, rules: 9 },
   { args: ['--version'], exitCode: 0 },
 ];
 
@@ -20,11 +25,13 @@ for (const testCase of cases) {
   let ok = result.status === testCase.exitCode;
   if (ok && testCase.json) {
     try {
-      ok = JSON.parse(result.stdout).schemaVersion === 1;
+      const report = JSON.parse(result.stdout);
+      ok = report.schemaVersion === 1 && (testCase.rules === undefined || report.rules.length === testCase.rules);
     } catch {
       ok = false;
     }
   }
+  if (ok && testCase.device) ok = /真机上验证/.test(result.stdout);
   console.log(`${ok ? 'ok  ' : 'FAIL'} ${testCase.args.join(' ')} -> exit ${result.status}`);
   if (!ok) {
     failed += 1;

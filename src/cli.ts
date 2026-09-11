@@ -7,7 +7,7 @@ import { renderText } from './report/text.ts';
 
 const HELP = `用法：deskkeel-doctor [目录] [选项]
 
-检查 Electron 工程能否交付到统信 UOS、银河麒麟。只读取工程文件，不上传源码。
+检查 Electron 工程能否交付到统信 UOS、银河麒麟。只读取工程文件和已安装的 node_modules，不上传源码。
 
 选项：
   --json        输出 JSON 报告

@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { majorFromSpec } from '../src/electron-version.ts';
 import { ELECTRON_RELEASES, runDoctor } from '../src/index.ts';
-import { electronLifecycle, majorFromSpec } from '../src/rules/electron-lifecycle.ts';
+import { electronLifecycle } from '../src/rules/electron-lifecycle.ts';
 
 const fixtures = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const fixture = (name: string): string => path.join(fixtures, name);

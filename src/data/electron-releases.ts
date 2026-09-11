@@ -48,3 +48,63 @@ export function daysBetween(from: string, to: Date): number {
 export function isElectronDataStale(data: ElectronReleaseData, now: Date): boolean {
   return daysBetween(data.dataAsOf, now) > ELECTRON_DATA_STALE_DAYS;
 }
+
+/** doctor 报告统一使用的架构规范名。 */
+export type LinuxArch =
+  | 'x86_64'
+  | 'aarch64'
+  | 'armv7l'
+  | 'ia32'
+  | 'loongarch64'
+  | 'mips64el'
+  | 'sw_64'
+  | 'riscv64'
+  | 'ppc64le'
+  | 's390x';
+
+/**
+ * Electron 官方 Linux 产物覆盖情况。
+ * armv7l 与 ia32 的停发版本来自 Electron Breaking Changes（44.0 与 19.0 两节），
+ * 见 https://www.electronjs.org/docs/latest/breaking-changes。
+ */
+export const ELECTRON_LINUX_ARTIFACTS: Record<LinuxArch, { official: boolean; lastMajor?: number }> = {
+  x86_64: { official: true },
+  aarch64: { official: true },
+  armv7l: { official: true, lastMajor: 43 },
+  ia32: { official: true, lastMajor: 18 },
+  loongarch64: { official: false },
+  mips64el: { official: false },
+  sw_64: { official: false },
+  riscv64: { official: false },
+  ppc64le: { official: false },
+  s390x: { official: false },
+};
+
+const ARCH_ALIASES: Record<string, LinuxArch> = {
+  x64: 'x86_64',
+  x86_64: 'x86_64',
+  'x86-64': 'x86_64',
+  amd64: 'x86_64',
+  arm64: 'aarch64',
+  aarch64: 'aarch64',
+  armv7l: 'armv7l',
+  armhf: 'armv7l',
+  arm: 'armv7l',
+  ia32: 'ia32',
+  x86: 'ia32',
+  i386: 'ia32',
+  i686: 'ia32',
+  loong64: 'loongarch64',
+  loongarch64: 'loongarch64',
+  mips64el: 'mips64el',
+  sw_64: 'sw_64',
+  sw64: 'sw_64',
+  riscv64: 'riscv64',
+  ppc64le: 'ppc64le',
+  s390x: 's390x',
+};
+
+/** 把打包配置里的架构名归一为规范名；无法识别时返回 null。 */
+export function normalizeArch(name: string): LinuxArch | null {
+  return ARCH_ALIASES[name.trim().toLowerCase()] ?? null;
+}

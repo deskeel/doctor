@@ -1,0 +1,16 @@
+{
+  "name": "arch-app",
+  "version": "1.0.0",
+  "devDependencies": {
+    "electron": "^44.0.0"
+  },
+  "build": {
+    "linux": {
+      "target": [
+        { "target": "deb", "arch": ["x64", "arm64", "armv7l"] },
+        { "target": "deb", "arch": "loong64" },
+        { "target": "AppImage", "arch": ["sparc"] }
+      ]
+    }
+  }
+}

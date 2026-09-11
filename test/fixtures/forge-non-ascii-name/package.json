@@ -1,0 +1,13 @@
+{
+  "name": "forge-office",
+  "productName": "办公助手",
+  "version": "1.0.0",
+  "devDependencies": {
+    "electron": "31.0.0"
+  },
+  "config": {
+    "forge": {
+      "makers": [{ "name": "@electron-forge/maker-deb", "config": { "options": { "maintainer": "Acme <dev@example.com>", "icon": "assets/icon.png" } } }]
+    }
+  }
+}

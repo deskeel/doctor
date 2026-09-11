@@ -1,0 +1,17 @@
+{
+  "name": "@acme/office",
+  "version": "1.0.0",
+  "homepage": "https://example.com",
+  "author": "Acme <dev@example.com>",
+  "devDependencies": {
+    "electron": "31.0.0"
+  },
+  "build": {
+    "productName": "办公助手",
+    "linux": {
+      "target": ["deb"],
+      "category": "Office",
+      "icon": "build/icons"
+    }
+  }
+}

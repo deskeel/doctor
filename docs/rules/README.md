@@ -9,3 +9,4 @@
 | [lockfile](./lockfile.md) | 锁文件存在、唯一，并与 packageManager 一致 | error / warning | local |
 | [linux-deb-target](./linux-deb-target.md) | 打包配置包含 Linux DEB 目标 | error / warning / info | local |
 | [deb-metadata](./deb-metadata.md) | DEB 元数据齐全：homepage、maintainer、图标、桌面分类、可执行文件名 | error / warning / info | local |
+| [product-name-ascii](./product-name-ascii.md) | DEB 包名与可执行文件名只含 ASCII 字符 | error / warning | local |

@@ -8,8 +8,17 @@ export {
   normalizeArch,
 } from './data/electron-releases.ts';
 export { majorFromSpec, resolveElectron } from './electron-version.ts';
+export {
+  type ElfInfo,
+  ElfParseError,
+  highestSymbolVersion,
+  isElf,
+  isMuslBinary,
+  parseElf,
+} from './elf.ts';
 export type { RunOptions } from './engine.ts';
 export { runDoctor } from './engine.ts';
+export { type NativeArtifact, type NativeModule, type NativeScan, scanNativeModules } from './native-modules.ts';
 export { renderJson } from './report/json.ts';
 export type { TextOptions } from './report/text.ts';
 export { renderText } from './report/text.ts';

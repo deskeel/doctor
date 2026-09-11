@@ -215,6 +215,11 @@ export function isMuslInterpreter(interpreter: string | null): boolean {
   return interpreter !== null && /ld-musl-/.test(interpreter);
 }
 
+/** 可执行文件看 PT_INTERP；共享库（如 .node）没有 PT_INTERP，看 DT_NEEDED 是否链接 musl 的 libc。 */
+export function isMuslBinary(info: Pick<ElfInfo, 'interpreter' | 'needed'>): boolean {
+  return isMuslInterpreter(info.interpreter) || info.needed.some((lib) => /^libc\.musl-/.test(lib));
+}
+
 /** 从 versionNeeds 中取某个版本前缀（如 GLIBC）的最高版本，例如 'GLIBC_2.34' → '2.34'。 */
 export function highestSymbolVersion(info: ElfInfo, prefix: 'GLIBC' | 'GLIBCXX' | 'CXXABI' | 'GCC'): string | null {
   let best: string | null = null;

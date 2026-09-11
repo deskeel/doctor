@@ -5,6 +5,7 @@ import { electronLifecycle } from './electron-lifecycle.ts';
 import { electronPlatformArchitecture } from './electron-platform-architecture.ts';
 import { linuxDebTarget } from './linux-deb-target.ts';
 import { lockfile } from './lockfile.ts';
+import { nativeModuleAbi } from './native-module-abi.ts';
 import { packageJson } from './package-json.ts';
 import { productNameAscii } from './product-name-ascii.ts';
 
@@ -21,4 +22,5 @@ export const builtinRules: readonly Rule[] = [
   linuxDebTarget,
   debMetadata,
   productNameAscii,
+  nativeModuleAbi,
 ];

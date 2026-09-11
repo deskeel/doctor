@@ -1,0 +1,6 @@
+{
+  "name": "native-app",
+  "version": "1.0.0",
+  "devDependencies": { "electron": "^44.0.0" },
+  "dependencies": { "fake-sqlite": "1.2.3", "fake-musl": "1.0.0", "fake-no-artifacts": "1.0.0", "fake-arm64": "1.0.0", "@scope/fake-pregyp": "2.0.0", "plain-lib": "1.0.0" }
+}

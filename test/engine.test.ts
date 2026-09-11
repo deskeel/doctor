@@ -74,5 +74,5 @@ test('json report round-trips', async () => {
   const parsed = JSON.parse(renderJson(report)) as typeof report;
   assert.equal(parsed.schemaVersion, 1);
   assert.equal(parsed.summary.error, report.summary.error);
-  assert.equal(parsed.rules.length, 4);
+  assert.deepEqual(parsed.rules, report.rules);
 });

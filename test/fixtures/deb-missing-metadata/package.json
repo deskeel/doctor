@@ -1,0 +1,13 @@
+{
+  "name": "bare-app",
+  "version": "1.0.0",
+  "devDependencies": {
+    "electron": "31.0.0"
+  },
+  "build": {
+    "productName": "Bare",
+    "linux": {
+      "target": ["deb"]
+    }
+  }
+}

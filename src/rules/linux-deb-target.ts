@@ -1,29 +1,5 @@
+import { builderLinuxTargets, forgeDebMaker } from '../builder/config.ts';
 import type { BuilderConfig, Finding, Rule } from '../types.ts';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/** 归一化 electron-builder 的 linux.target，返回小写的 target 名列表。 */
-function builderLinuxTargets(config: Record<string, unknown>): string[] {
-  const linux = config.linux;
-  if (!isRecord(linux)) return [];
-  const target = linux.target;
-  if (target == null) return [];
-  const items = Array.isArray(target) ? target : [target];
-  return items
-    .map((item) =>
-      typeof item === 'string' ? item : isRecord(item) && typeof item.target === 'string' ? item.target : '',
-    )
-    .filter((name) => name !== '')
-    .map((name) => name.toLowerCase());
-}
-
-function forgeHasDebMaker(config: Record<string, unknown>): boolean {
-  const makers = config.makers;
-  if (!Array.isArray(makers)) return false;
-  return makers.some((maker) => isRecord(maker) && typeof maker.name === 'string' && maker.name.includes('maker-deb'));
-}
 
 function cannotInspect(builder: BuilderConfig): Finding {
   return {
@@ -62,7 +38,7 @@ export const linuxDebTarget: Rule = {
     if (!builder.config) return [cannotInspect(builder)];
 
     if (builder.kind === 'electron-builder') {
-      const targets = builderLinuxTargets(builder.config);
+      const targets = builderLinuxTargets(builder.config).map((entry) => entry.target);
       if (targets.includes('deb')) return [];
       return [
         {
@@ -79,7 +55,7 @@ export const linuxDebTarget: Rule = {
       ];
     }
 
-    if (forgeHasDebMaker(builder.config)) return [];
+    if (forgeDebMaker(builder.config)) return [];
     return [
       {
         ruleId: 'linux-deb-target',

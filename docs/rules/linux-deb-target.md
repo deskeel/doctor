@@ -36,4 +36,4 @@ Electron Forge：安装 `@electron-forge/maker-deb` 并加入 `makers`。
 
 ## 已知局限
 
-不执行 JS/TS 配置文件，因此无法检查动态生成的配置；不检查 DEB 元数据（maintainer、图标、分类），这将由后续的 `deb-metadata` 规则负责。
+不执行 JS/TS 配置文件，因此无法检查动态生成的配置；不检查 DEB 元数据（maintainer、图标、分类），由 `deb-metadata` 规则负责。

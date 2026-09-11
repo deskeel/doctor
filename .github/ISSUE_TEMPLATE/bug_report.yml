@@ -1,0 +1,37 @@
+name: 问题反馈
+description: doctor 报告了错误的结论、崩溃，或漏掉了应该发现的问题
+labels: [bug]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果与实际结果
+      description: doctor 应该报告什么，实际报告了什么。
+    validations:
+      required: true
+  - type: textarea
+    id: json
+    attributes:
+      label: "`deskkeel-doctor --json` 的输出"
+      description: 该输出只包含工程配置摘要，不包含源码。请自行删除敏感信息。
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: electron
+    attributes:
+      label: Electron 版本
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 运行 doctor 的操作系统与 Node 版本
+      placeholder: macOS 15 / Node 22.12
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: 目标系统（如有）
+      placeholder: 统信 UOS V20 1070 x86_64

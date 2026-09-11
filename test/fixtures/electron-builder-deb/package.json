@@ -1,0 +1,18 @@
+{
+  "name": "demo-app",
+  "version": "1.2.3",
+  "packageManager": "pnpm@10.0.0",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.example.demo",
+    "productName": "Demo",
+    "linux": {
+      "target": ["deb"],
+      "category": "Utility",
+      "maintainer": "demo@example.com"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+name: 规则提案
+description: 建议新增或修改一条检查规则
+labels: [rule]
+body:
+  - type: input
+    id: id
+    attributes:
+      label: 建议的规则 ID
+      description: 小写字母与连字符，描述检查对象而不是结论，例如 `native-module-abi`。
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 检查什么
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么在统信 UOS / 银河麒麟上会出问题
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 阈值或判断依据的来源
+      description: 官方文档链接、软件仓库记录或真机验证记录。没有来源的规则只能作为候选，不进入默认规则集。
+    validations:
+      required: true
+  - type: dropdown
+    id: verification
+    attributes:
+      label: 结论能否在本地修复
+      options:
+        - local：可以在本地修复
+        - device：必须在真机上验证
+    validations:
+      required: true

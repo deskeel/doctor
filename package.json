@@ -1,0 +1,66 @@
+{
+  "name": "@deskkeel/doctor",
+  "version": "0.0.0",
+  "description": "检查 Electron 工程能否交付到统信 UOS、银河麒麟的开源预检工具",
+  "keywords": [
+    "electron",
+    "uos",
+    "kylin",
+    "linux",
+    "deb",
+    "preflight",
+    "doctor",
+    "信创",
+    "统信",
+    "银河麒麟"
+  ],
+  "homepage": "https://github.com/deskkeel/doctor#readme",
+  "bugs": "https://github.com/deskkeel/doctor/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deskkeel/doctor.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "deskkeel-doctor": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "format": "biome check --write .",
+    "lint": "biome check .",
+    "prepublishOnly": "pnpm run check && pnpm run build",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

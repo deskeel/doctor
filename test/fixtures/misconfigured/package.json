@@ -1,0 +1,12 @@
+{
+  "name": "misconfigured-app",
+  "version": "0.0.1",
+  "dependencies": {
+    "electron": "latest"
+  },
+  "build": {
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

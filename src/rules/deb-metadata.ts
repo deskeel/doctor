@@ -22,12 +22,24 @@ function finding(severity: Finding['severity'], title: string, detail: string, f
   return { ruleId: RULE_ID, severity, verification: 'local', title, detail, fix };
 }
 
-/** electron-builder 默认从 <buildResources>/icon.png 或 <buildResources>/icons/ 取图标。 */
-async function builderDefaultIconExists(cwd: string, config: Record<string, unknown>): Promise<boolean> {
+function buildResourcesDir(config: Record<string, unknown>): string {
   const directories = isRecord(config.directories) ? config.directories : {};
-  const buildResources = str(directories.buildResources) ?? 'build';
-  const base = path.join(cwd, buildResources);
-  return (await exists(path.join(base, 'icon.png'))) || (await exists(path.join(base, 'icons')));
+  return str(directories.buildResources) ?? 'build';
+}
+
+/** electron-builder 未声明图标时回退到 <buildResources>/icons/，再退到 Electron 默认图标。 */
+async function builderDefaultIconExists(cwd: string, config: Record<string, unknown>): Promise<boolean> {
+  const base = path.join(cwd, buildResourcesDir(config));
+  return (await exists(path.join(base, 'icons'))) || (await exists(path.join(base, 'icon.png')));
+}
+
+/** electron-builder 的 computePackageUrl：homepage，否则 repository 的 url。 */
+function projectUrl(packageJson: PackageJson): string | undefined {
+  if (str(packageJson.homepage)) return packageJson.homepage as string;
+  const repository = packageJson.repository;
+  if (typeof repository === 'string') return str(repository);
+  if (isRecord(repository)) return str(repository.url);
+  return undefined;
 }
 
 async function checkElectronBuilder(
@@ -40,6 +52,17 @@ async function checkElectronBuilder(
   const deb = isRecord(config.deb) ? config.deb : {};
   const findings: Finding[] = [];
 
+  if (!projectUrl(packageJson)) {
+    findings.push(
+      finding(
+        'error',
+        'package.json 没有 homepage，也没有可用的 repository 地址',
+        'electron-builder 生成 DEB 时要求提供项目主页（Homepage 字段），homepage 与 repository 都缺失时构建直接失败。',
+        '在 package.json 中填写 homepage，或填写 repository.url。',
+      ),
+    );
+  }
+
   if (!str(deb.maintainer) && !str(linux.maintainer) && !authorHasEmail(packageJson)) {
     findings.push(
       finding(
@@ -51,13 +74,13 @@ async function checkElectronBuilder(
     );
   }
 
-  if (!str(linux.category)) {
+  if (!str(linux.category) && !str(deb.category)) {
     findings.push(
       finding(
-        'warning',
-        `${file} 未声明 linux.category`,
-        '.desktop 文件缺少 Categories 时，应用在 UOS / 麒麟的启动器里可能落入“其他”分类或不出现在分类菜单中。',
-        '按 freedesktop 菜单规范设置 linux.category，例如 "Utility"、"Office"、"Development"。',
+        'info',
+        `${file} 未声明 linux.category，将使用默认值 Utility`,
+        '默认分类能让应用出现在启动器中，但与应用实际用途可能不符。',
+        '按 freedesktop 菜单规范设置 linux.category，例如 "Office"、"Development"。',
       ),
     );
   }
@@ -67,7 +90,7 @@ async function checkElectronBuilder(
     findings.push(
       finding(
         'warning',
-        `${file} 未声明图标，且 build/icon.png 或 build/icons/ 不存在`,
+        `${file} 未声明图标，且 ${buildResourcesDir(config)}/icons/ 与 ${buildResourcesDir(config)}/icon.png 都不存在`,
         'electron-builder 会退回使用 Electron 默认图标，安装后桌面和启动器显示的是 Electron 标志而不是应用图标。',
         '放置 build/icon.png（至少 512×512）或 build/icons/ 多尺寸目录，或用 linux.icon 指向图标文件。',
       ),
@@ -131,10 +154,10 @@ function checkForge(packageJson: PackageJson, maker: Record<string, unknown>, fi
 
 export const debMetadata: Rule = {
   id: RULE_ID,
-  title: 'DEB 元数据齐全：maintainer、图标、desktop 分类、可执行文件名',
-  description: '在打包配置会产出 DEB 的前提下，检查 Maintainer、图标、桌面分类和可执行文件名是否可以确定。',
+  title: 'DEB 元数据齐全：homepage、maintainer、图标、desktop 分类、可执行文件名',
+  description: '在打包配置会产出 DEB 的前提下，检查 Homepage、Maintainer、图标、桌面分类和可执行文件名是否可以确定。',
   source:
-    'electron-builder Linux 选项（maintainer 默认取 author，icon 默认取 build/icon.png 或 build/icons）：https://www.electron.build/linux；maker-deb / electron-installer-debian 选项：https://github.com/electron-userland/electron-installer-debian#options；Debian Policy 5.6.2 Maintainer：https://www.debian.org/doc/debian-policy/ch-controlfields.html#maintainer',
+    'electron-builder FpmTarget 在 homepage 或 author 邮箱缺失时抛错，LinuxTargetHelper 在 category 缺失时回退 Utility、图标缺失时回退 buildResources/icons 再回退默认图标：https://github.com/electron-userland/electron-builder/tree/master/packages/app-builder-lib/src/targets/linux；maker-deb / electron-installer-debian 选项：https://github.com/electron-userland/electron-installer-debian#options；Debian Policy 5.6.2 Maintainer：https://www.debian.org/doc/debian-policy/ch-controlfields.html#maintainer',
   async check(context) {
     const { packageJson, builder } = context;
     if (!packageJson || !builder?.config || !producesDeb(builder)) return [];

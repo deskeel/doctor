@@ -33,6 +33,8 @@ export interface PackageJson {
   packageManager?: string;
   productName?: string;
   author?: string | { name?: string; email?: string; url?: string };
+  homepage?: string;
+  repository?: string | { type?: string; url?: string };
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   build?: unknown;

@@ -23,7 +23,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "deskkeel-doctor": "./dist/cli.js"
+    "deskkeel-doctor": "dist/cli.js"
   },
   "exports": {
     ".": {

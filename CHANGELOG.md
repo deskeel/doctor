@@ -1,0 +1,18 @@
+# Changelog
+
+## 0.1.0 (2026-09-14)
+
+
+### Features
+
+* add a zero-dependency read-only ELF reader ([d702d04](https://github.com/deskkeel/doctor/commit/d702d041d8e8771e051710f2f71e582b637b0179))
+* add deb-metadata rule ([35e657b](https://github.com/deskkeel/doctor/commit/35e657b9d413de054184a3bc1b1bfa2d4a19ca19))
+* add electron-lifecycle rule with an embedded release table ([8e13a3b](https://github.com/deskkeel/doctor/commit/8e13a3bf66a7cfafdd68c820cedf51a230bced4b))
+* add electron-platform-architecture rule ([f2ea353](https://github.com/deskkeel/doctor/commit/f2ea35388cb687063abf62ced56a8937c154aa4a))
+* add native-module-abi rule ([7c134fe](https://github.com/deskkeel/doctor/commit/7c134fef73550092eb70686b095f37c4224ce8cf))
+* add product-name-ascii rule ([be99408](https://github.com/deskkeel/doctor/commit/be9940880bdc5ee98c0f611ac4fbe1f8bf839f7e))
+
+
+### Bug Fixes
+
+* align deb-metadata with electron-builder's actual checks ([7ddb619](https://github.com/deskkeel/doctor/commit/7ddb619586b8a986d657195d7b1c9eaaff7b67d9))

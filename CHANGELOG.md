@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/deskkeel/doctor/compare/v0.1.0...v0.1.1) (2026-09-14)
+
+
+### Documentation
+
+* rewrite README and add an English version ([902c681](https://github.com/deskkeel/doctor/commit/902c6814fa51d1ebcfb1159b0b279f078825a251))
+
 ## 0.1.0 (2026-09-14)
 
 

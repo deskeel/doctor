@@ -21,7 +21,7 @@ pnpm format     # Biome 自动修复格式与可修复的 lint 问题
 - 只使用可擦除的 TypeScript 语法（`erasableSyntaxOnly`）：不用 `enum`、参数属性、命名空间。
 - 格式化和 lint 由 Biome 负责，配置在 `biome.json`，CI 会执行 `biome check`。
 - 测试使用 Node 内置的 `node:test` 与 `node:assert/strict`，测试文件放在 `test/`，以 `.test.ts` 结尾。
-- 面向用户的文案（报告、帮助、README、规则文档）使用中文。代码标识符、提交信息使用英文。
+- 面向用户的文案（报告、帮助、README、规则文档）使用中文。代码标识符、提交信息使用英文。`README.en.md` 是 README 的英文镜像，改 README 时同步更新它。
 - 运行时依赖保持最少。新增依赖需要在 PR 中说明理由。
 
 ## 边界

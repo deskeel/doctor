@@ -13,3 +13,5 @@
 | [deb-metadata](./deb-metadata.md) | DEB 元数据齐全：homepage、maintainer、图标、桌面分类、可执行文件名 | error / warning / info | local |
 | [product-name-ascii](./product-name-ascii.md) | DEB 包名与可执行文件名只含 ASCII 字符 | error / warning | local |
 | [native-module-abi](./native-module-abi.md) | 原生模块的 Linux x86_64 产物及其 glibc / libstdc++ 需求已读出 | warning / info | device / local |
+
+可选发行版工程规范与独立 DEB 产物规则见 [packaging](./packaging.md)，包含稳定 ID、目标/渠道适用范围、覆盖状态、直接官方来源和解析限制；它们不会加入原有默认九条规则。

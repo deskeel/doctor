@@ -1,6 +1,8 @@
 import path from 'node:path';
 import pkg from '../package.json' with { type: 'json' };
 import { loadProjectContext } from './context.ts';
+import { type PackagingOptions, validatePackagingOptions } from './packaging/profile.ts';
+import { checkProjectPackaging } from './packaging/project.ts';
 import { builtinRules } from './rules/index.ts';
 import {
   type DoctorReport,
@@ -11,7 +13,7 @@ import {
   type Rule,
 } from './types.ts';
 
-export interface RunOptions {
+export interface RunOptions extends PackagingOptions {
   /** 要检查的工程目录，默认当前目录。 */
   cwd?: string;
   /** 自定义规则集，默认内置规则。 */
@@ -41,6 +43,7 @@ function summarizeFindings(findings: Finding[]): DoctorReport['summary'] {
 }
 
 export async function runDoctor(options: RunOptions = {}): Promise<DoctorReport> {
+  validatePackagingOptions(options);
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const rules = options.rules ?? builtinRules;
   const context = await loadProjectContext(cwd, options.now ?? new Date());
@@ -50,9 +53,12 @@ export async function runDoctor(options: RunOptions = {}): Promise<DoctorReport>
     findings.push(...(await rule.check(context)));
   }
 
+  const extra = options.target ? await checkProjectPackaging(context, options) : undefined;
+  if (extra) findings.push(...extra.findings);
   const summary = summarizeFindings(findings);
   return {
     schemaVersion: REPORT_SCHEMA_VERSION,
+    ...(extra ? { packaging: extra.packaging } : {}),
     doctorVersion: pkg.version,
     cwd,
     project: summarizeProject(context),

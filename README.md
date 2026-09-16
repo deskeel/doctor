@@ -35,7 +35,7 @@ npx @deskkeel/doctor --no-color   # 关闭颜色；也可设置 NO_COLOR 环境�
 | --- | --- |
 | 0 | 没有错误级别的问题 |
 | 1 | 存在错误级别的问题 |
-| 2 | doctor 自身运行失败 |
+| 2 | 用法错误、检查未完成或 doctor 自身运行失败 |
 
 ### 报告示例
 
@@ -99,7 +99,7 @@ doctor 只读取工程自身的 `package.json`、锁文件、electron-builder / 
 - **验证方式**：`local` 表示可以在本地修复；`device` 表示 doctor 只能读出事实，能否运行必须在统信 UOS / 银河麒麟真机上确认。
 - **依据**：结论所基于的具体事实，例如读到的二进制路径与符号版本、内置数据的截止日期。
 
-目前只有 `native-module-abi` 会产出 `device` 结果。它报出预编译产物对 glibc / libstdc++ 的要求，但统信 UOS V20 与银河麒麟 V10 提供的符号版本尚无官方或真机证据，所以结论是“需真机验证”，不是“不兼容”。
+九条默认规则中，只有 `native-module-abi` 会产出 `device` 结果；可选 DEB 检查也会提示运行验证。它报出预编译产物对 glibc / libstdc++ 的要求，但统信 UOS V20 与银河麒麟 V10 提供的符号版本尚无官方或真机证据，所以结论是“需真机验证”，不是“不兼容”。
 
 ## 当前范围
 
@@ -145,3 +145,35 @@ process.exitCode = report.exitCode;
 ## 许可证
 
 [MIT](./LICENSE)
+
+## 可选发行版规范与只读 DEB 检查
+
+```bash
+npx @deskkeel/doctor ./my-app --target uos-v20 --channel store --json
+npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct
+npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb --target uos-v20 --channel store --json
+```
+
+`target` 支持 `uos-v20`、`kylin-v10`；`channel` 支持 `store`、`direct`、`enterprise` 且必须同时指定 target。均可省略，不猜测商店。UOS 商店政策仅对 UOS/store 生效；麒麟通用打包规范在显式渠道下启用，不推定额外渠道政策。厂商产物判定仅覆盖 amd64。
+
+工程只读静态包名、维护脚本入口、显式 desktop/updater/sandbox 配置；动态 JS/TS、继承与钩子不执行，无法确定时标为 unknown。inspect 在内存/流中检查 ar/tar、control、目录、UOS info、desktop/图标引用、UID/GID/mode 与四类维护脚本清单；不安装、不解包到用户目录、不运行包内代码、不上传、不联网、不验签，也不读取 deskkeel.yml。
+
+未压缩与 gzip 内置支持；xz/zstd 使用本机 PATH 中的可信 `xz`/`zstd`，工具缺失或失败即 incomplete/退出 2，不自动安装。PAX/GNU longname、base-256、稀疏/特殊设备和其他压缩目前也以未完成结束。默认上限为输入 512 MiB、总展开 1 GiB、单条目 256 MiB、100,000 条 tar 记录、32 个 ar 成员与每个读取/解压流 30 秒；解压过程中检查体积及条目预算。详情见[支持矩阵与规则依据](./docs/rules/packaging.md)。
+
+原工程 JSON schema=1 和九条默认规则保持兼容，显式目标增加可选 `packaging`。inspect 使用独立 schema=1、`inputType: "deb"`，报告 target/channel、规则集版本、覆盖、findings 与 completion。`complete` 表示静态阶段完成，不代表审核/兼容通过。coverage 的 `unknown`、`not-applicable`、`incomplete` 不会被当作通过；运行、sandbox、签名信任与 ABI 始终需目标验证。
+
+退出码：0=静态检查完成且无 error（允许 warning/unknown）；1=已完成但有规则 error；2=用法错误、读取/解析/压缩工具/资源限制失败。inspect 未完成仍输出 JSON 报告。UOS 脚本政策冲突与四段版本/三段示例冲突用 warning；不把麒麟 MIPS 4755 示例套用 amd64。
+
+```ts
+import { inspectDeb, renderInspectText, runDoctor } from '@deskkeel/doctor';
+
+const project = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
+const report = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {
+  target: 'uos-v20', channel: 'store',
+  limits: { inputBytes: 128 * 1024 * 1024 }, // 只能降低默认资源上限
+});
+console.log(renderInspectText(report));
+process.exitCode = report.exitCode;
+```
+
+Node 运行要求仍为 20.10+；源码测试需要支持 TypeScript 类型剥离的 Node 22。真实客户工程/包、目标机安装、厂商审核、签名信任及升级效果仍待验证，合成测试不代表真机通过。

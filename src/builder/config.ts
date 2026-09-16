@@ -60,3 +60,24 @@ export function producesDeb(builder: BuilderConfig): boolean {
     ? builderHasDebTarget(builder.config)
     : forgeDebMaker(builder.config) !== null;
 }
+
+/** electron-builder 用 sanitize-filename 处理 productName：去掉文件名非法字符与控制字符，保留 Unicode。 */
+function sanitizeFileName(name: string): string {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: 与 sanitize-filename 的处理范围一致
+  return name.replace(/[/?<>\\:*|"\x00-\x1f\x80-\x9f]/g, '').replace(/[. ]+$/, '');
+}
+
+/** fpm 生成 DEB 前会把包名转小写，并把下划线和空格换成连字符。 */
+function fpmNormalize(name: string): string {
+  return name.toLowerCase().replace(/[_ ]/g, '-');
+}
+
+/** Shared static inference used by the existing name rule and opt-in packaging checks. */
+export function builderPackageName(pkg: PackageJson, config: Record<string, unknown>): string | undefined {
+  const text = (v: unknown): string | undefined => (typeof v === 'string' && v.trim() ? v : undefined);
+  const deb = isRecord(config.deb) ? config.deb : {};
+  const name = text(pkg.name) ?? '';
+  const product = text(config.productName) ?? text(pkg.productName) ?? name;
+  const raw = text(deb.packageName) ?? (name.startsWith('@') ? sanitizeFileName(product) : name);
+  return raw ? fpmNormalize(raw) : undefined;
+}

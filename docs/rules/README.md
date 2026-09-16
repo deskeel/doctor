@@ -14,4 +14,4 @@
 | [product-name-ascii](./product-name-ascii.md) | DEB 包名与可执行文件名只含 ASCII 字符 | error / warning | local |
 | [native-module-abi](./native-module-abi.md) | 原生模块的 Linux x86_64 产物及其 glibc / libstdc++ 需求已读出 | warning / info | device / local |
 
-可选发行版工程规范与独立 DEB 产物规则见 [packaging](./packaging.md)，包含稳定 ID、目标/渠道适用范围、覆盖状态、直接官方来源和解析限制；它们不会加入原有默认九条规则。
+面向用户的全部检测项、UOS / 麒麟厂商硬限制速查与结果语义见[检测项清单](../checks.md)。可选发行版工程规范与独立 DEB 产物规则见 [packaging](./packaging.md)，包含稳定 ID、目标/渠道适用范围、覆盖状态、直接官方来源和解析限制；它们不会加入原有默认九条规则。

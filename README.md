@@ -8,34 +8,44 @@
 
 检查一个 Electron 工程能否交付到统信 UOS、银河麒麟。开源、零配置、离线运行，不上传源码。
 
-```bash
-npx @deskkeel/doctor
-```
+## 快速开始
 
-## 它回答什么问题
-
-把 Electron 应用交付到国产桌面系统时，多数失败发生在真机上：DEB 装不上、启动即崩、原生模块加载失败。这些问题大部分在源码阶段就有迹象。doctor 只读取工程本身的文件，把能在本地确认的问题直接指出来，把只能在真机上确认的风险单独标出来，不把猜测写成结论。
-
-## 使用
-
-需要 Node.js 20.10 或更高版本。
+需要 Node.js 20.10 或更高版本，先安装依赖再运行（`native-module-abi` 要读取已安装的 `.node` 产物）。
 
 ```bash
-npx @deskkeel/doctor              # 检查当前目录
-npx @deskkeel/doctor ./my-app     # 检查指定目录
-npx @deskkeel/doctor --json       # 输出 JSON 报告，适合 CI
-npx @deskkeel/doctor --no-color   # 关闭颜色；也可设置 NO_COLOR 环境变量
+npx @deskkeel/doctor                                                         # 检查当前工程（默认 9 条规则）
+npx @deskkeel/doctor ./my-app --target uos-v20 --channel store              # 附加 UOS 商店规范检查
+npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct           # 附加麒麟通用打包规范
+npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb \
+  --target uos-v20 --channel store                                          # 只读检查 DEB 产物
+npx @deskkeel/doctor --json                                                 # JSON 报告，适合 CI
 ```
 
-先安装依赖再运行。`native-module-abi` 规则要从已安装的 `node_modules` 里读取 `.node` 产物，没有 `node_modules` 时它只会提示扫描覆盖不足。
+`--target` 可选 `uos-v20`、`kylin-v10`；`--channel` 可选 `store`、`direct`、`enterprise`，必须与 target 同用；均可省略，不猜测渠道。厂商产物判定仅覆盖 amd64。
 
-退出码：
+## 检查什么
+
+doctor 只读取工程自身的 `package.json`、锁文件、electron-builder / Electron Forge 配置和 `node_modules` 里已存在的 `.node` 产物；`inspect` 只在内存/流中解析 DEB。不执行构建和安装，不修改任何文件，不发送网络请求。
+
+检查分三层，全部规则 ID、UOS / 麒麟厂商硬限制与判断依据见 **[检测项清单](./docs/checks.md)**：
+
+- **默认工程检查（9 条）**：DEB 目标与元数据、包名字符集、锁文件、Electron 支持窗口与架构、原生模块 ABI。
+- **目标规范工程检查（`--target`，6 条）**：最终包名推导、维护脚本入口、desktop 字段、UOS 商店 updater 政策、sandbox 参数。
+- **DEB 产物检查（`inspect`，10 条）**：容器结构、control、UOS / 麒麟目录布局、UOS info 清单、desktop 与图标、UID/GID/mode 权限、维护脚本清单。UOS 商店的 root:root 所有权、SUID、组/其他可写、受限系统目录等均为 error 级硬限制。
+
+`inspect` 不安装、不执行脚本、不落盘解包、不验签；tar/gzip 内置支持，xz/zstd 使用本机 PATH 中的工具，缺失或失败即返回未完成（退出码 2），不自动安装。
+
+## 怎么读结果
+
+- **严重程度**：`error` 会构建/安装失败或违反厂商硬限制；`warning` 很可能在目标系统上出问题；`info` 是提示或覆盖不足的说明。
+- **验证方式**：`local` 本地可修；`device` 表示 doctor 只能读出事实，能否运行必须在统信 UOS / 银河麒麟真机上确认。
+- **依据**：结论所基于的具体事实，例如读到的二进制路径与符号版本、内置数据的截止日期。
 
 | 退出码 | 含义 |
 | --- | --- |
-| 0 | 没有错误级别的问题 |
-| 1 | 存在错误级别的问题 |
-| 2 | 用法错误、检查未完成或 doctor 自身运行失败 |
+| 0 | 静态检查完成且无 error（仍可能有 warning / unknown） |
+| 1 | 静态检查完成，存在 error |
+| 2 | 用法错误、输入读取/解析失败、解压工具缺失或资源超限（未完成） |
 
 ### 报告示例
 
@@ -59,56 +69,6 @@ Electron：^44.0.0
 其中 1 项需要在真机上验证。
 ```
 
-## 检查什么
-
-doctor 只读取工程自身的 `package.json`、锁文件、electron-builder / Electron Forge 配置，以及 `node_modules` 里已经存在的 `.node` 产物。它不执行构建和安装，不修改任何文件，不发送任何网络请求。
-
-默认规则共 9 条，按检查对象分三组。每条规则的完整说明、判断依据来源和已知局限见 [docs/rules](./docs/rules/README.md)。
-
-**工程与打包配置**
-
-| 规则 | 检查内容 |
-| --- | --- |
-| [`package-json`](./docs/rules/package-json.md) | 目录是一个可解析的 Node.js 工程 |
-| [`electron-dependency`](./docs/rules/electron-dependency.md) | `electron` 声明在 devDependencies，且版本明确 |
-| [`lockfile`](./docs/rules/lockfile.md) | 锁文件存在且唯一，并与 `packageManager` 字段一致 |
-| [`linux-deb-target`](./docs/rules/linux-deb-target.md) | electron-builder 的 linux target 含 deb，或 Forge 配置了 maker-deb |
-| [`deb-metadata`](./docs/rules/deb-metadata.md) | DEB 必填元数据：homepage、maintainer、图标、桌面分类、可执行文件名 |
-| [`product-name-ascii`](./docs/rules/product-name-ascii.md) | DEB 包名符合 dpkg 规则；可执行文件名与安装目录不含非 ASCII 字符 |
-
-**Electron 发行版**
-
-| 规则 | 检查内容 |
-| --- | --- |
-| [`electron-lifecycle`](./docs/rules/electron-lifecycle.md) | Electron 大版本仍在官方支持窗口内。内置发布表带 `dataAsOf`，超过 90 天会提示可能过期 |
-| [`electron-platform-architecture`](./docs/rules/electron-platform-architecture.md) | 声明的 Linux 目标架构有 Electron 官方产物。armv7l、ia32 已停发；loong64、mips64el、sw_64、riscv64 登记为需要定制运行时 |
-
-**原生模块**
-
-| 规则 | 检查内容 |
-| --- | --- |
-| [`native-module-abi`](./docs/rules/native-module-abi.md) | 识别原生模块，只读解析 `.node` 产物的架构、`NODE_MODULE_VERSION`、`GLIBC_*` / `GLIBCXX_*` 需求与 musl 链接 |
-
-每条规则都写明判断依据的来源。没有官方文档或真机证据来源的规则不会进入默认规则集。
-
-## 怎么读结果
-
-每个结果带两个维度和一份证据：
-
-- **严重程度**：`error` 会导致构建失败或安装失败；`warning` 很可能在目标系统上出问题；`info` 是提示或覆盖不足的说明。
-- **验证方式**：`local` 表示可以在本地修复；`device` 表示 doctor 只能读出事实，能否运行必须在统信 UOS / 银河麒麟真机上确认。
-- **依据**：结论所基于的具体事实，例如读到的二进制路径与符号版本、内置数据的截止日期。
-
-九条默认规则中，只有 `native-module-abi` 会产出 `device` 结果；可选 DEB 检查也会提示运行验证。它报出预编译产物对 glibc / libstdc++ 的要求，但统信 UOS V20 与银河麒麟 V10 提供的符号版本尚无官方或真机证据，所以结论是“需真机验证”，不是“不兼容”。
-
-## 当前范围
-
-- 目标系统：统信 UOS V20、银河麒麟桌面 V10 的 x86_64 DEB 交付。
-- ARM64（飞腾、鲲鹏）目标只识别，不做判定。
-- LoongArch、MIPS64、SW64、RISC-V 没有 Electron 官方产物，只登记为需要定制运行时。
-- 不检查 Windows、macOS。
-- 不自动修复，不执行构建，不调用打包器。
-
 ## 在 CI 中使用
 
 `--json` 输出稳定的机器可读报告，退出码可直接作为门禁：
@@ -129,14 +89,25 @@ JSON 报告带 `schemaVersion` 字段。新增可选字段不递增它；删除�
 ## 作为库使用
 
 ```ts
-import { renderText, runDoctor } from '@deskkeel/doctor';
+import { inspectDeb, runDoctor } from '@deskkeel/doctor';
 
-const report = await runDoctor({ cwd: './my-app' });
-console.log(renderText(report));
-process.exitCode = report.exitCode;
+const report = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
+const deb = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {
+  target: 'uos-v20',
+  channel: 'store',
+  limits: { inputBytes: 128 * 1024 * 1024 }, // 只能降低默认资源上限
+});
+process.exitCode = deb.exitCode;
 ```
 
-`runDoctor` 还接受 `rules`（自定义规则集）和 `now`（固定运行时刻，让日期类结论可复现）。只读 ELF 读取器（`parseElf`）、原生模块扫描器（`scanNativeModules`）和 Electron 发布表（`ELECTRON_RELEASES`）也作为库导出。
+`runDoctor` 还接受 `rules`（自定义规则集）和 `now`（固定运行时刻，让日期类结论可复现）。只读 ELF 读取器（`parseElf`）、原生模块扫描器（`scanNativeModules`）、Electron 发布表（`ELECTRON_RELEASES`）与文本渲染器（`renderText` / `renderInspectText`）也作为库导出。
+
+## 当前范围
+
+- 目标系统：统信 UOS V20、银河麒麟桌面 V10 的 x86_64 DEB 交付。
+- ARM64（飞腾、鲲鹏）目标只识别，不做判定；LoongArch、MIPS64、SW64、RISC-V 只登记为需要定制运行时。
+- 不检查 Windows、macOS；不自动修复，不执行构建，不调用打包器。
+- 运行、签名信任、sandbox、升级等行为检查始终标记为需真机验证，静态检查不构成厂商审核结论。
 
 ## 参与
 
@@ -145,35 +116,3 @@ process.exitCode = report.exitCode;
 ## 许可证
 
 [MIT](./LICENSE)
-
-## 可选发行版规范与只读 DEB 检查
-
-```bash
-npx @deskkeel/doctor ./my-app --target uos-v20 --channel store --json
-npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct
-npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb --target uos-v20 --channel store --json
-```
-
-`target` 支持 `uos-v20`、`kylin-v10`；`channel` 支持 `store`、`direct`、`enterprise` 且必须同时指定 target。均可省略，不猜测商店。UOS 商店政策仅对 UOS/store 生效；麒麟通用打包规范在显式渠道下启用，不推定额外渠道政策。厂商产物判定仅覆盖 amd64。
-
-工程只读静态包名、维护脚本入口、显式 desktop/updater/sandbox 配置；动态 JS/TS、继承与钩子不执行，无法确定时标为 unknown。inspect 在内存/流中检查 ar/tar、control、目录、UOS info、desktop/图标引用、UID/GID/mode 与四类维护脚本清单；不安装、不解包到用户目录、不运行包内代码、不上传、不联网、不验签，也不读取 deskkeel.yml。
-
-未压缩与 gzip 内置支持；xz/zstd 使用本机 PATH 中的可信 `xz`/`zstd`，工具缺失或失败即 incomplete/退出 2，不自动安装。PAX/GNU longname、base-256、稀疏/特殊设备和其他压缩目前也以未完成结束。默认上限为输入 512 MiB、总展开 1 GiB、单条目 256 MiB、100,000 条 tar 记录、32 个 ar 成员与每个读取/解压流 30 秒；解压过程中检查体积及条目预算。详情见[支持矩阵与规则依据](./docs/rules/packaging.md)。
-
-原工程 JSON schema=1 和九条默认规则保持兼容，显式目标增加可选 `packaging`。inspect 使用独立 schema=1、`inputType: "deb"`，报告 target/channel、规则集版本、覆盖、findings 与 completion。`complete` 表示静态阶段完成，不代表审核/兼容通过。coverage 的 `unknown`、`not-applicable`、`incomplete` 不会被当作通过；运行、sandbox、签名信任与 ABI 始终需目标验证。
-
-退出码：0=静态检查完成且无 error（允许 warning/unknown）；1=已完成但有规则 error；2=用法错误、读取/解析/压缩工具/资源限制失败。inspect 未完成仍输出 JSON 报告。UOS 脚本政策冲突与四段版本/三段示例冲突用 warning；不把麒麟 MIPS 4755 示例套用 amd64。
-
-```ts
-import { inspectDeb, renderInspectText, runDoctor } from '@deskkeel/doctor';
-
-const project = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
-const report = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {
-  target: 'uos-v20', channel: 'store',
-  limits: { inputBytes: 128 * 1024 * 1024 }, // 只能降低默认资源上限
-});
-console.log(renderInspectText(report));
-process.exitCode = report.exitCode;
-```
-
-Node 运行要求仍为 20.10+；源码测试需要支持 TypeScript 类型剥离的 Node 22。真实客户工程/包、目标机安装、厂商审核、签名信任及升级效果仍待验证，合成测试不代表真机通过。

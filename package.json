@@ -1,6 +1,6 @@
 {
   "name": "@deskkeel/doctor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "检查 Electron 工程能否交付到统信 UOS、银河麒麟的开源预检工具",
   "keywords": [
     "electron",

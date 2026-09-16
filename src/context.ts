@@ -1,4 +1,4 @@
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type {
@@ -72,9 +72,15 @@ function findElectron(packageJson: PackageJson | null): ElectronDependency | nul
   return null;
 }
 
-async function parseStaticConfig(file: string): Promise<{ config: Record<string, unknown> | null; error?: string }> {
+async function parseStaticConfig(
+  file: string,
+  cwd: string,
+): Promise<{ config: Record<string, unknown> | null; error?: string }> {
   try {
-    const text = await readFile(file, 'utf8');
+    const root = await realpath(cwd);
+    const actual = await realpath(file);
+    if (!actual.startsWith(`${root}${path.sep}`)) return { config: null, error: '配置指向工程外，未读取' };
+    const text = await readFile(actual, 'utf8');
     const parsed: unknown = file.endsWith('.json') ? JSON.parse(text) : parseYaml(text);
     if (!isRecord(parsed)) return { config: null, error: '配置文件顶层不是对象' };
     return { config: parsed };
@@ -89,7 +95,7 @@ async function detectBuilder(cwd: string, packageJson: PackageJson | null): Prom
   }
   for (const file of BUILDER_STATIC_FILES) {
     if (await exists(path.join(cwd, file))) {
-      return { kind: 'electron-builder', file, ...(await parseStaticConfig(path.join(cwd, file))) };
+      return { kind: 'electron-builder', file, ...(await parseStaticConfig(path.join(cwd, file), cwd)) };
     }
   }
   for (const file of BUILDER_DYNAMIC_FILES) {
@@ -100,7 +106,7 @@ async function detectBuilder(cwd: string, packageJson: PackageJson | null): Prom
   if (isRecord(forge)) return { kind: 'forge', file: 'package.json#config.forge', config: forge };
   if (typeof forge === 'string') {
     if (forge.endsWith('.json'))
-      return { kind: 'forge', file: forge, ...(await parseStaticConfig(path.join(cwd, forge))) };
+      return { kind: 'forge', file: forge, ...(await parseStaticConfig(path.resolve(cwd, forge), cwd)) };
     return { kind: 'forge', file: forge, config: null };
   }
   for (const file of FORGE_DYNAMIC_FILES) {

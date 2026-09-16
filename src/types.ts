@@ -7,6 +7,8 @@ export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 
 export interface Finding {
   ruleId: string;
+  /** 新增规则的直接技术来源。 */
+  source?: string;
   severity: Severity;
   verification: Verification;
   /** 一句话结论。 */
@@ -87,6 +89,7 @@ export const REPORT_SCHEMA_VERSION = 1;
 
 export interface DoctorReport {
   schemaVersion: typeof REPORT_SCHEMA_VERSION;
+  packaging?: import('./packaging/project.ts').ProjectPackagingReport;
   doctorVersion: string;
   cwd: string;
   project: ProjectSummary;

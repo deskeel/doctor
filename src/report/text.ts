@@ -22,6 +22,8 @@ export function renderText(report: DoctorReport, options: TextOptions = {}): str
   lines.push(`Electron：${project.electron ?? '未检测到'}`);
   lines.push(`包管理器：${project.packageManager ?? '未检测到锁文件'}`);
   lines.push(`打包器：${project.builder ?? '未检测到'}`);
+  lines.push(`目标：${report.packaging?.target ?? '未指定'} / 渠道：${report.packaging?.channel ?? '未指定'}`);
+  for (const c of report.packaging?.coverage ?? []) lines.push(`[${c.ruleId}] ${c.status}: ${c.detail}`);
   lines.push('');
 
   const findings = [...report.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
@@ -48,5 +50,6 @@ function formatFinding(
   if (finding.detail) body.push(`    原因：${finding.detail}`);
   if (finding.fix) body.push(`    建议：${finding.fix}`);
   for (const item of finding.evidence ?? []) body.push(dim(`    依据：${item}`));
+  if (finding.source) body.push(`    来源：${finding.source}`);
   return [head, ...body].join('\n');
 }

@@ -1,4 +1,4 @@
-import { forgeDebMaker, isRecord, producesDeb } from '../builder/config.ts';
+import { builderPackageName, forgeDebMaker, isRecord, producesDeb } from '../builder/config.ts';
 import type { Finding, PackageJson, Rule } from '../types.ts';
 
 const RULE_ID = 'product-name-ascii';
@@ -8,17 +8,6 @@ const DEB_PACKAGE_NAME = /^[a-z0-9][a-z0-9+.-]+$/;
 
 function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() !== '' ? value : undefined;
-}
-
-/** electron-builder 用 sanitize-filename 处理 productName：去掉文件名非法字符与控制字符，保留 Unicode。 */
-function sanitizeFileName(name: string): string {
-  // biome-ignore lint/suspicious/noControlCharactersInRegex: 与 sanitize-filename 的处理范围一致
-  return name.replace(/[/?<>\\:*|"\x00-\x1f\x80-\x9f]/g, '').replace(/[. ]+$/, '');
-}
-
-/** fpm 生成 DEB 前会把包名转小写，并把下划线和空格换成连字符。 */
-function fpmNormalize(name: string): string {
-  return name.toLowerCase().replace(/[_ ]/g, '-');
 }
 
 function finding(severity: Finding['severity'], title: string, detail: string, fix: string): Finding {
@@ -41,9 +30,8 @@ function checkElectronBuilder(packageJson: PackageJson, config: Record<string, u
   const linux = isRecord(config.linux) ? config.linux : {};
   const deb = isRecord(config.deb) ? config.deb : {};
 
-  const rawPackageName = str(deb.packageName) ?? (name.startsWith('@') ? sanitizeFileName(productName) : name);
-  const packageName = fpmNormalize(rawPackageName);
-  if (rawPackageName !== '' && !DEB_PACKAGE_NAME.test(packageName)) {
+  const packageName = builderPackageName(packageJson, config) ?? '';
+  if (packageName !== '' && !DEB_PACKAGE_NAME.test(packageName)) {
     const origin = str(deb.packageName)
       ? 'deb.packageName'
       : name.startsWith('@')

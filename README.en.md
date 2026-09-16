@@ -37,7 +37,7 @@ Exit codes:
 | --- | --- |
 | 0 | No error-level findings |
 | 1 | At least one error-level finding |
-| 2 | doctor itself failed to run |
+| 2 | Usage error, incomplete inspection, or doctor itself failed to run |
 
 ## What it checks
 
@@ -79,7 +79,7 @@ Each finding carries two dimensions and its evidence:
 - **Verification**: `local` means it can be fixed on your machine; `device` means doctor can only read the facts, and whether the app runs must be confirmed on a real UOS / Kylin device.
 - **Evidence**: the concrete facts behind the conclusion, such as the binary path and symbol versions that were read, or the cut-off date of bundled data.
 
-Only `native-module-abi` currently produces `device` findings. It reports what glibc / libstdc++ versions a prebuilt binary requires, but there is no official or device-verified evidence yet for the symbol versions UOS V20 and Kylin V10 provide, so the verdict is "needs device verification", not "incompatible".
+Among the nine default rules, only `native-module-abi` produces `device` findings. Optional DEB inspection also flags runtime verification. It reports what glibc / libstdc++ versions a prebuilt binary requires, but there is no official or device-verified evidence yet for the symbol versions UOS V20 and Kylin V10 provide, so the verdict is "needs device verification", not "incompatible".
 
 ## Current scope
 
@@ -125,3 +125,35 @@ Rules come from real delivery failures. Failure cases you hit on UOS / Kylin, an
 ## License
 
 [MIT](./LICENSE)
+
+## Optional distribution checks and read-only DEB inspection
+
+```bash
+npx @deskkeel/doctor ./my-app --target uos-v20 --channel store --json
+npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct
+npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb --target uos-v20 --channel store --json
+```
+
+Targets: `uos-v20`, `kylin-v10`. Channels: `store`, `direct`, `enterprise`; a channel requires a target. Both are optional; no store channel is assumed. UOS store policy applies only to UOS/store. Kylin's general packaging guidance applies with an explicit channel, without inventing additional channel policy. Vendor artifact checks cover amd64 only.
+
+Project checks read static package-name derivation, script references and explicit desktop/updater/sandbox settings. Dynamic JS/TS, inherited configuration and hooks are never executed; unresolved values remain unknown. `inspect` reads ar/tar, control, layout, UOS info, desktop/icon references, UID/GID/mode and the four maintainer-script names in bounded memory/streams. It never installs, extracts to user directories, executes package code, uploads, accesses the network, verifies signatures or reads deskkeel.yml.
+
+Uncompressed tar and gzip are built in. xz/zstd use trusted local `xz`/`zstd` executables from PATH; missing/failing tools produce incomplete/exit 2 and are never auto-installed. PAX/GNU longname, base-256, sparse/special entries and other compression formats currently also stop as incomplete. Defaults: 512 MiB input, 1 GiB total expanded data, 256 MiB per entry, 100,000 tar entries, 32 ar members, 30 seconds per read/decompression stream. Expanded size and entry budgets are enforced while decompressing. See the [support matrix and direct rule sources](./docs/rules/packaging.md).
+
+The original project JSON schema=1 and nine default rules remain compatible; an explicit target adds optional `packaging`. Inspect has a separate schema=1 with `inputType: "deb"`, context, ruleset version, coverage, findings and completion. `complete` means static processing finished, not vendor approval or compatibility. Unknown, not-applicable and incomplete coverage is never presented as a pass. Runtime behavior, sandbox, signature trust and ABI require target-device verification.
+
+Exit codes: 0=static processing complete without errors (warnings/unknowns allowed); 1=completed with rule errors; 2=usage, read, parse, codec or resource-limit failure. An incomplete inspect still emits JSON. Conflicting UOS script guidance and four-component version text versus three-component examples produce warnings. The Kylin MIPS 4755 example is never treated as an amd64 requirement.
+
+```ts
+import { inspectDeb, renderInspectText, runDoctor } from '@deskkeel/doctor';
+
+const project = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
+const report = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {
+  target: 'uos-v20', channel: 'store',
+  limits: { inputBytes: 128 * 1024 * 1024 }, // May only lower the defaults
+});
+console.log(renderInspectText(report));
+process.exitCode = report.exitCode;
+```
+
+Runtime support remains Node 20.10+. Source tests require a Node 22 release with TypeScript type stripping. Real customer projects/packages, target installation, vendor review, trust and upgrades remain separately unverified; synthetic tests do not establish device compatibility.

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/deskkeel/doctor/compare/v0.1.1...v0.1.2) (2026-09-16)
+
+
+### Features
+
+* add target packaging profiles and DEB inspection ([2a1ae3c](https://github.com/deskkeel/doctor/commit/2a1ae3c45155d630e8849ee4f06de4bddca3353b))
+* add target packaging profiles and DEB inspection ([47708a8](https://github.com/deskkeel/doctor/commit/47708a850ad36fa47cde1d84c4fbb1297306e780))
+
 ## [0.1.1](https://github.com/deskkeel/doctor/compare/v0.1.0...v0.1.1) (2026-09-14)
 
 

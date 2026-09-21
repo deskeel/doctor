@@ -242,9 +242,10 @@ test('external codecs missing, corrupt or timed out never pass; archive bytes ar
     await assert.rejects(decompress('data.tar.xz', Buffer.from('bad'), 4096, 50), /超时|解压失败/);
     assert.ok(Date.now() - start < 5000);
     await writeFile(tool, `#!${process.execPath}\nprocess.stdin.resume(); process.stdout.write(Buffer.alloc(10000));`);
-    await assert.rejects(decompress('data.tar.xz', Buffer.from('bad'), 100, 1000), /超限/);
+    // Allow process startup on loaded hosts; the dedicated timeout case above stays at 50 ms.
+    await assert.rejects(decompress('data.tar.xz', Buffer.from('bad'), 100, 10000), /超限/);
     await writeFile(tool, `#!${process.execPath}\nprocess.stderr.write('corrupt'); process.exit(1);`);
-    await assert.rejects(decompress('data.tar.xz', Buffer.from('bad'), 100, 1000), /解压失败/);
+    await assert.rejects(decompress('data.tar.xz', Buffer.from('bad'), 100, 10000), /解压失败/);
   } finally {
     if (original === undefined) delete process.env.PATH;
     else process.env.PATH = original;

@@ -70,6 +70,17 @@ doctor 是离线的只读工具。以下内容不会被接受：
 ## 提交与发布
 
 - 提交标题使用 `type: summary`：`feat`、`fix`、`docs`、`chore`、`refactor`、`test`。
-- `main` 上的提交会由 release-please 汇总成发布 PR，合并后自动打 tag、生成 CHANGELOG 并发布到 npm。`feat` 提升次版本号，`fix` 提升修订号，标题带 `!` 或正文含 `BREAKING CHANGE` 提升主版本号。
+- `main` 上的提交会由 release-please 汇总成发布 PR，合并后自动打 tag、生成 CHANGELOG，并通过 OIDC 将 npm 包暂存，等待维护者以 2FA 审批后正式发布。`feat` 提升次版本号，`fix` 提升修订号，标题带 `!` 或正文含 `BREAKING CHANGE` 提升主版本号。
 - JSON 报告的字段属于公开接口。新增可选字段作为 `feat` 发布；删除或改名字段需要递增 `REPORT_SCHEMA_VERSION` 并标记为破坏性变更。
 - 内置数据（`src/data/`）更新时在提交信息里写明核对日期与来源，并同步 `dataAsOf`。
+
+### npm 暂存与审批
+
+- 包设置保持 `Require two-factor authentication and disallow bypass 2fa tokens`。
+- Trusted Publisher 绑定 `deskeel/doctor` 的 `release.yml`，只允许 `npm stage publish`，不允许直接 `npm publish`；无需配置 npm 长期 token。
+- CI 使用 Node 24 和 npm 11.15.0，检查及构建通过后暂存包。工作流成功仅表示暂存成功，GitHub Release/tag 不表示 npm 已上架。
+- 维护者在 npm 的 **Staged Packages** 中核对包名、版本和来源，点击 **Approve** 并完成 2FA；也可使用 npm 11.15.0 以上的 `npm stage list @deskeel-org/doctor`、`npm stage view <stage-id>` 和 `npm stage approve <stage-id>`。
+- 不批准的产物使用 `npm stage reject <stage-id>` 拒绝；不要绕过审批改用直接发布。
+- 审批后检查 `npm view @deskeel-org/doctor version` 和 `npx @deskeel-org/doctor@<version> --version`。自动化不代替维护者完成 2FA。
+
+参考：[npm 暂存发布](https://docs.npmjs.com/staged-publishing/)、[Trusted Publisher 权限](https://docs.npmjs.com/trusted-publishers/)。

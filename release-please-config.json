@@ -7,7 +7,7 @@
   "initial-version": "0.1.0",
   "packages": {
     ".": {
-      "package-name": "@deskkeel/doctor",
+      "package-name": "@deskeel-org/doctor",
       "changelog-path": "CHANGELOG.md"
     }
   }

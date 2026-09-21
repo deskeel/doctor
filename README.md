@@ -1,7 +1,7 @@
-# DeskKeel Doctor
+# Deskeel Doctor
 
-[![npm](https://img.shields.io/npm/v/%40deskkeel%2Fdoctor)](https://www.npmjs.com/package/@deskkeel/doctor)
-[![CI](https://github.com/deskkeel/doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/deskkeel/doctor/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40deskeel-org%2Fdoctor)](https://www.npmjs.com/package/@deskeel-org/doctor)
+[![CI](https://github.com/deskeel/doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/deskeel/doctor/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 中文 | [English](./README.en.md)
@@ -13,12 +13,12 @@
 需要 Node.js 20.10 或更高版本，先安装依赖再运行（`native-module-abi` 要读取已安装的 `.node` 产物）。
 
 ```bash
-npx @deskkeel/doctor                                                         # 检查当前工程（默认 9 条规则）
-npx @deskkeel/doctor ./my-app --target uos-v20 --channel store              # 附加 UOS 商店规范检查
-npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct           # 附加麒麟通用打包规范
-npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb \
+npx @deskeel-org/doctor                                                         # 检查当前工程（默认 9 条规则）
+npx @deskeel-org/doctor ./my-app --target uos-v20 --channel store              # 附加 UOS 商店规范检查
+npx @deskeel-org/doctor ./my-app --target kylin-v10 --channel direct           # 附加麒麟通用打包规范
+npx @deskeel-org/doctor inspect ./com.example.app_1.2.3_amd64.deb \
   --target uos-v20 --channel store                                          # 只读检查 DEB 产物
-npx @deskkeel/doctor --json                                                 # JSON 报告，适合 CI
+npx @deskeel-org/doctor --json                                                 # JSON 报告，适合 CI
 ```
 
 `--target` 可选 `uos-v20`、`kylin-v10`；`--channel` 可选 `store`、`direct`、`enterprise`，必须与 target 同用；均可省略，不猜测渠道。厂商产物判定仅覆盖 amd64。
@@ -50,7 +50,7 @@ doctor 只读取工程自身的 `package.json`、锁文件、electron-builder / 
 ### 报告示例
 
 ```text
-DeskKeel Doctor v0.1.0
+Deskeel Doctor v0.1.0
 目录：/home/me/my-app
 工程：my-app 1.4.0
 Electron：^44.0.0
@@ -76,7 +76,7 @@ Electron：^44.0.0
 ```yaml
 # GitHub Actions
 - run: pnpm install --frozen-lockfile
-- run: npx @deskkeel/doctor --json > doctor-report.json
+- run: npx @deskeel-org/doctor --json > doctor-report.json
 - uses: actions/upload-artifact@v4
   if: always()
   with:
@@ -89,7 +89,7 @@ JSON 报告带 `schemaVersion` 字段。新增可选字段不递增它；删除�
 ## 作为库使用
 
 ```ts
-import { inspectDeb, runDoctor } from '@deskkeel/doctor';
+import { inspectDeb, runDoctor } from '@deskeel-org/doctor';
 
 const report = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
 const deb = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {

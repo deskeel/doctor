@@ -23,7 +23,7 @@ Electron 只维护最新的三个大版本。停止维护后不再有安全修�
 
 ## 怎么改
 
-升级到仍在维护的 Electron 大版本，并提交锁文件。发布表过期时升级 `@deskkeel/doctor`，或到 [endoflife.date/electron](https://endoflife.date/electron) 核对。
+升级到仍在维护的 Electron 大版本，并提交锁文件。发布表过期时升级 `@deskeel-org/doctor`，或到 [endoflife.date/electron](https://endoflife.date/electron) 核对。
 
 ## 依据来源
 

@@ -1,7 +1,7 @@
-# DeskKeel Doctor
+# Deskeel Doctor
 
-[![npm](https://img.shields.io/npm/v/%40deskkeel%2Fdoctor)](https://www.npmjs.com/package/@deskkeel/doctor)
-[![CI](https://github.com/deskkeel/doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/deskkeel/doctor/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40deskeel-org%2Fdoctor)](https://www.npmjs.com/package/@deskeel-org/doctor)
+[![CI](https://github.com/deskeel/doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/deskeel/doctor/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 [中文](./README.md) | English
@@ -15,12 +15,12 @@ Report text is currently Chinese only. The JSON report (`--json`) uses stable En
 Requires Node.js 20.10 or newer. Install dependencies first — `native-module-abi` reads `.node` artifacts from `node_modules`.
 
 ```bash
-npx @deskkeel/doctor                                                         # check the current project (9 default rules)
-npx @deskkeel/doctor ./my-app --target uos-v20 --channel store              # add UOS store policy checks
-npx @deskkeel/doctor ./my-app --target kylin-v10 --channel direct           # add Kylin generic packaging checks
-npx @deskkeel/doctor inspect ./com.example.app_1.2.3_amd64.deb \
+npx @deskeel-org/doctor                                                         # check the current project (9 default rules)
+npx @deskeel-org/doctor ./my-app --target uos-v20 --channel store              # add UOS store policy checks
+npx @deskeel-org/doctor ./my-app --target kylin-v10 --channel direct           # add Kylin generic packaging checks
+npx @deskeel-org/doctor inspect ./com.example.app_1.2.3_amd64.deb \
   --target uos-v20 --channel store                                          # read-only DEB inspection
-npx @deskkeel/doctor --json                                                 # JSON report for CI
+npx @deskeel-org/doctor --json                                                 # JSON report for CI
 ```
 
 `--target` accepts `uos-v20` or `kylin-v10`; `--channel` accepts `store`, `direct`, or `enterprise` and requires a target. Both are optional — no channel is guessed. Vendor verdicts cover amd64 artifacts only.
@@ -52,7 +52,7 @@ Checks come in three layers — see **[the checks reference](./docs/checks.md)**
 ### Sample report
 
 ```text
-DeskKeel Doctor v0.1.0
+Deskeel Doctor v0.1.0
 目录：/home/me/my-app
 工程：my-app 1.4.0
 Electron：^44.0.0
@@ -78,7 +78,7 @@ Electron：^44.0.0
 ```yaml
 # GitHub Actions
 - run: pnpm install --frozen-lockfile
-- run: npx @deskkeel/doctor --json > doctor-report.json
+- run: npx @deskeel-org/doctor --json > doctor-report.json
 - uses: actions/upload-artifact@v4
   if: always()
   with:
@@ -91,7 +91,7 @@ JSON reports carry a `schemaVersion` field. Adding optional fields does not bump
 ## Using as a library
 
 ```ts
-import { inspectDeb, runDoctor } from '@deskkeel/doctor';
+import { inspectDeb, runDoctor } from '@deskeel-org/doctor';
 
 const report = await runDoctor({ cwd: './my-app', target: 'uos-v20', channel: 'store' });
 const deb = await inspectDeb('./com.example.app_1.2.3_amd64.deb', {

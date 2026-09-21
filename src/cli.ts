@@ -7,8 +7,8 @@ import { type PackagingOptions, validatePackagingOptions } from './packaging/pro
 import { renderJson } from './report/json.ts';
 import { renderText } from './report/text.ts';
 
-const HELP = `用法：deskkeel-doctor [目录] [选项]
-      deskkeel-doctor inspect <文件.deb> [选项]
+const HELP = `用法：deskeel-doctor [目录] [选项]
+      deskeel-doctor inspect <文件.deb> [选项]
 
 检查 Electron 工程能否交付到统信 UOS、银河麒麟。只读取工程文件和已安装的 node_modules，不上传源码。
 

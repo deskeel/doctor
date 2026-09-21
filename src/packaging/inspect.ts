@@ -559,7 +559,7 @@ export async function inspectDeb(file: string, options: InspectOptions = {}): Pr
 }
 export function renderInspectText(report: InspectReport): string {
   return [
-    `DeskKeel Doctor v${report.doctorVersion} — DEB inspect`,
+    `Deskeel Doctor v${report.doctorVersion} — DEB inspect`,
     `输入：${report.input}`,
     `目标：${report.context.target ?? '未指定'} / 渠道：${report.context.channel ?? '未指定'}`,
     `规则集：${report.rulesetVersion}；完成状态：${report.completion}`,

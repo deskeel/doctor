@@ -1,5 +1,5 @@
 {
-  "name": "@deskkeel/doctor",
+  "name": "@deskeel-org/doctor",
   "version": "0.1.2",
   "description": "检查 Electron 工程能否交付到统信 UOS、银河麒麟的开源预检工具",
   "keywords": [
@@ -14,16 +14,16 @@
     "统信",
     "银河麒麟"
   ],
-  "homepage": "https://github.com/deskkeel/doctor#readme",
-  "bugs": "https://github.com/deskkeel/doctor/issues",
+  "homepage": "https://github.com/deskeel/doctor#readme",
+  "bugs": "https://github.com/deskeel/doctor/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deskkeel/doctor.git"
+    "url": "git+https://github.com/deskeel/doctor.git"
   },
   "license": "MIT",
   "type": "module",
   "bin": {
-    "deskkeel-doctor": "dist/cli.js"
+    "deskeel-doctor": "dist/cli.js"
   },
   "exports": {
     ".": {

@@ -15,7 +15,7 @@ export function renderText(report: DoctorReport, options: TextOptions = {}): str
   const dim = (text: string): string => (options.color ? `${ESC}2m${text}${ESC}0m` : text);
 
   const lines: string[] = [];
-  lines.push(`DeskKeel Doctor v${report.doctorVersion}`);
+  lines.push(`Deskeel Doctor v${report.doctorVersion}`);
   lines.push(`目录：${report.cwd}`);
   const { project } = report;
   if (project.name) lines.push(`工程：${project.name}${project.version ? ` ${project.version}` : ''}`);

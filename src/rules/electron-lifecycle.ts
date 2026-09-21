@@ -69,7 +69,7 @@ export function createElectronLifecycle(data: ElectronReleaseData = ELECTRON_REL
             verification: 'local',
             title: `${label} 比 doctor 内置的发布表更新，无法判断支持窗口`,
             detail: `发布表截至 ${data.dataAsOf}，最高覆盖到 Electron ${newest}。`,
-            fix: '升级 @deskkeel/doctor 到最新版本以获得更新的发布表。',
+            fix: '升级 @deskeel-org/doctor 到最新版本以获得更新的发布表。',
             evidence,
           });
         }
@@ -82,7 +82,7 @@ export function createElectronLifecycle(data: ElectronReleaseData = ELECTRON_REL
           verification: 'local',
           title: `Electron 发布窗口信息可能过期：内置发布表截至 ${data.dataAsOf}，已超过 ${ELECTRON_DATA_STALE_DAYS} 天`,
           detail: '新的 Electron 大版本大约每两个月发布一次，本规则的支持窗口结论以内置数据为准。',
-          fix: '升级 @deskkeel/doctor 到最新版本，或到 https://endoflife.date/electron 核对当前支持窗口。',
+          fix: '升级 @deskeel-org/doctor 到最新版本，或到 https://endoflife.date/electron 核对当前支持窗口。',
           evidence,
         });
       }

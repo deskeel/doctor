@@ -12,7 +12,7 @@ body:
   - type: textarea
     id: json
     attributes:
-      label: "`deskkeel-doctor --json` 的输出"
+      label: "`deskeel-doctor --json` 的输出"
       description: 该输出只包含工程配置摘要，不包含源码。请自行删除敏感信息。
       render: json
     validations:
